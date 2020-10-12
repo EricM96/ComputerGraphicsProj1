@@ -7,11 +7,11 @@ PROGRAMMERS:			  Eric McCullough
                           Ben Jinkerson
                           Dallas Bramel
  COURSE:				  CSC 525/625
- ASSIGNMENT:			  Lab 09
+ ASSIGNMENT:			  Project 1
  LAST MODIFIED DATE:	  10/11/2020
- DESCRIPTION:			  Demo: Draw a bitmap of a man
+ DESCRIPTION:			  An open GL frontend to wttr.in
  NOTE:					  N/A
- FILES:					  lab09.cpp, (labProj.sln, ...)
+ FILES:					  main.cpp, (labProj.sln, ...)
  IDE/COMPILER:			  MicroSoft Visual Studio 2019
  INSTRUCTION FOR COMPILATION AND EXECUTION:
         1.		Double click on labProj.sln	to OPEN the project
@@ -23,89 +23,49 @@ PROGRAMMERS:			  Eric McCullough
 #include <iostream>
 #include <string>
 
-//********* Prototypes
-void myInit();
-void myDisplayCallback();
-void mouseCallbackHanlder(int button, int state, int x, int y);
-void motionCallbackHandler(int x, int y);
+//********* Prototypes **************************************************************
+void init();
+void displayCallback();
 
+void get_weather();
 void draw();
-void drawMan();
+void render_pixelmap();
+void render_text();
+void render_sunny();
+void render_raining();
+void render_thunder();
+void render_cloudy();
 
-//********* Globals
-GLubyte bitmap[260] = {
-    0x01, 0xC0, 0x00, 0x00, 0x03, 0xE0, 0x00, 0x00,
-    0x01, 0xFF, 0xC0, 0x00, 0x00, 0x1F, 0xC0, 0x00,
-
-    0x70, 0x00, 0x80, 0x00, 0xFC, 0x00, 0x80, 0x00,
-    0x3F, 0x80, 0x80, 0x00, 0x03, 0xC0, 0xC0, 0x00,
-
-    0x00, 0xC1, 0x20, 0x00, 0x00, 0xC1, 0x80, 0x00,
-    0x00, 0xC1, 0x80, 0x00, 0x00, 0xC3, 0x00, 0x00,
-
-    0x00, 0xC3, 0x00, 0x00, 0x00, 0xC6, 0x00, 0x00,
-    0x00, 0xC6, 0x00, 0x00, 0x00, 0xCC, 0x00, 0x00,
-
-    0x00, 0x8C, 0x00, 0x00, 0x01, 0xC6, 0x00, 0x00,
-    0x00, 0xC6, 0x00, 0x00, 0x01, 0x9C, 0x00, 0x00,
-
-    0x01, 0xDC, 0x00, 0x00, 0x01, 0xDC, 0x00, 0x00,
-    0x01, 0xDC, 0x00, 0x00, 0x01, 0xFE, 0x00, 0x00,
-
-    0x01, 0xFE, 0x00, 0x00, 0x01, 0xFE, 0x78, 0x00,
-    0x01, 0xFE, 0xE0, 0x00, 0x03, 0xFF, 0x80, 0x00,
-
-    0x03, 0xFF, 0x80, 0x00, 0x03, 0xFF, 0x80, 0x00,
-    0x03, 0xFD, 0xFE, 0x00, 0x07, 0xF8, 0x03, 0x00,
-
-    0x03, 0xF8, 0x03, 0x00, 0x01, 0xF8, 0x06, 0x00,
-    0x03, 0xF8, 0x0C, 0x00, 0x03, 0xf8, 0x18, 0x00,
-
-    0x07, 0xF8, 0x38, 0x00, 0x03, 0xF8, 0x60, 0x00,
-    0x01, 0xFF, 0xE0, 0x00, 0x01, 0xFF, 0xC0, 0x00,
-
-    0x01, 0xFF, 0x80, 0x00, 0x03, 0xFF, 0x80, 0x00,
-    0x03, 0xff, 0x00, 0x00, 0x0F, 0x80, 0x00, 0x00,
-
-    0x0F, 0x00, 0x00, 0x00, 0x1E, 0x3E, 0x00, 0x00,
-    0x38, 0x7F, 0x80, 0x00, 0x38, 0x7F, 0x80, 0x00,
-
-    0x30, 0x74, 0xC0, 0x00, 0x63, 0xFF, 0xE0, 0x00,
-    0x60, 0x3F, 0xF0, 0x00, 0xE0, 0x3F, 0xF0, 0x00,
-
-    0xE0, 0x1F, 0xF0, 0x00, 0xE0, 0x1F, 0xF0, 0x00,
-    0xF8, 0x0F, 0xF8, 0x00, 0x3F, 0xF7, 0xF0, 0x00,
-
-    0x01, 0xF3, 0xF0, 0x00, 0x00, 0x11, 0xE0, 0x00,
-    0x00, 0x19, 0x06, 0x00, 0x00, 0x0F, 0x00, 0x00,
-
-    0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x01, 0xC0,
-    0x00, 0x00, 0x01, 0x20, 0x00, 0x00, 0x00, 0x20,
-
-    0x00, 0x00, 0x00, 0xE0,
+//********** Globals ****************************************************************
+enum class WeatherCondition {
+    Clear,
+    Raining,
+    Thunder,
+    Cloudy
 };
 
-float raster_x = -300;
-float raster_y = -300;
+WeatherCondition weather_condition = WeatherCondition::Clear;
+std::string weather_condition_str = "Clear";
+std::string temp = "10 - 11";
+std::string wind_heading = "north";
+std::string wind_speed = "24";
+std::string visibility = "9";
+std::string precip_in = "0.0";  // How much rainfall is expected in inches
+std::string precip_prob = "0.0"; // Chance of rain
 
-GLubyte purple[3] = { 255, 0, 255 };
-GLubyte orange[3] = { 255, 255, 0 };
-
-GLubyte* current_color = purple;
-
-//********* Subroutines
-int main(int argc, char** argv) {
+//********* Subroutines **************************************************************
+int main(int argc, char** argv)
+{
+    get_weather();
     glutInit(&argc, argv);  // initialization
 
-    glutInitWindowSize(400, 400);                // specify a window size
+    glutInitWindowSize(600, 600);                // specify a window size
     glutInitWindowPosition(100, 0);              // specify a window position
-    glutCreateWindow("Simple Polygon Drawing");  // create a titled window
-    glutMouseFunc(mouseCallbackHanlder);
-    glutMotionFunc(motionCallbackHandler);
+    glutCreateWindow("wttr.in");  // create a titled window
 
-    myInit();  // specify some settings
+    init();  // specify some settings
 
-    glutDisplayFunc(myDisplayCallback);  // register a callback
+    glutDisplayFunc(displayCallback);  // register a callback
 
     glutMainLoop();  // get into an infinite loop
 
@@ -113,13 +73,15 @@ int main(int argc, char** argv) {
 }
 
 //***********************************************************************************
-void myInit() {
+void init()
+{
     glClearColor(1, 1, 1, 0);          // specify a background clor: white
-    gluOrtho2D(-200, 200, -200, 200);  // specify a viewing area
+    gluOrtho2D(-300, 300, -300, 300);  // specify a viewing area
 }
 
 //***********************************************************************************
-void myDisplayCallback() {
+void displayCallback()
+{
     glClear(GL_COLOR_BUFFER_BIT);  // draw the background
 
     draw();
@@ -127,74 +89,156 @@ void myDisplayCallback() {
     glFlush();  // flush out the buffer contents"
 }
 
-//***********************************************************************************
-void mouseCallbackHanlder(int button, int state, int x, int y) {
-    float mx = x;
-    float my = y;
 
-    switch (button) {
-    case GLUT_LEFT_BUTTON: {
-        if (state == GLUT_DOWN) {
-            current_color = purple;
-            raster_x = -(200 - mx);
-            raster_y = 200 - my;
-            glutPostRedisplay();
+//***********************************************************************************
+void draw() 
+{
+    render_text();
+    render_pixelmap();
+
+    switch (weather_condition)
+    {
+    case WeatherCondition::Clear:
+        {
+            render_sunny();
+            break;
         }
-        break;
-    }
-    case GLUT_RIGHT_BUTTON: {
-        if (state == GLUT_DOWN) {
-            current_color = orange;
-            raster_x = -(200 - mx);
-            raster_y = 200 - my;
-            glutPostRedisplay();
+        case WeatherCondition::Raining:
+        {
+            render_raining();
+            break;
         }
-        break;
-    }
-    default: {
-        break;
-    }
+        case WeatherCondition::Thunder:
+        {
+            render_thunder();
+            break;
+        }
+        case WeatherCondition::Cloudy:
+        {
+            render_cloudy();
+            break;
+        }
+        default:
+        {
+            render_sunny();
+            break;
+        }
     }
 }
 
 //***********************************************************************************
-void motionCallbackHandler(int x, int y) {
-    float mx = x;
-    float my = y;
-
-    raster_x = -(200 - mx);
-    raster_y = 200 - my;
-    glutPostRedisplay();
+/**
+* @TODO: Eric
+* @brief: pull the weather report from the wttr.in API and instantiate globals
+*         with the data
+*/
+void get_weather()
+{
+    return;
 }
 
-//***********************************************************************************
-void draw() {
-    glColor3ub(255, 0, 0);
-
-    // draw axis
-    glPointSize(1);
-    glBegin(GL_POINTS);
-    for (int x{ -150 }; x <= 150; ++x) glVertex2i(x, 0);
-    glColor3ub(0, 255, 0);
-    for (int y{ -150 }; y <= 150; ++y) glVertex2i(0, y);
-    glEnd();
-
-    glColor3ub(255, 0, 0);
-    glRasterPos2i(155, 0);
-    glutBitmapCharacter(GLUT_BITMAP_9_BY_15, static_cast<int>('X'));
-
-    glColor3ub(0, 255, 0);
-    glRasterPos2i(0, 155);
-    glutBitmapCharacter(GLUT_BITMAP_9_BY_15, static_cast<int>('Y'));
-
-    drawMan();
+/**
+* @TODO: Daniel
+* @brief: Based on the weather condition, display a 600x600 pixel map representing
+*         that weather. Remember that it's a background picture, so text and icons
+*         should still be visible on top of it.
+*         Here's some visual inspiration: http://wttr.in/
+*                                       : https://www.ky3.com/weather/
+*/
+void render_pixelmap()
+{
+    switch (weather_condition)
+    {
+        case WeatherCondition::Clear:
+        {
+            break;
+        }
+        case WeatherCondition::Raining:
+        {
+            break;
+        }
+        case WeatherCondition::Thunder:
+        {
+            break;
+        }
+        case WeatherCondition::Cloudy:
+        {
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
 }
 
-//***********************************************************************************
-void drawMan() {
-    float bit_map_width = 27.0;
-    float bit_map_height = 65.0;
-    glColor3ubv(current_color);
-    glRasterPos2f(raster_x - bit_map_width, raster_y - bit_map_height);
-    glBitmap(27, 65, 0, 0, 0, 0, bitmap);
+/**
+* @TODO: Tyler
+* @brief: Using the global variables defined at the head of the file, fill out the right
+*         half of the screen with the weather report. I'd keep things withing the coordinate
+*         range of (0, 150) - (150, -150)
+*         Here's some visual inspiration: http://wttr.in/
+*                                       : https://www.ky3.com/weather/
+*/
+void render_text()
+{
+    return;
+}
+
+/**
+* @TODO: Dallas
+* @brief: Make some icon that represents clear or sunny weather. Keep it on the top left quadrant
+*         of the screen. We can go back and make everyone's line up nicely later. Use whatever
+*         you want to make the icon, but be sure to include circles or curved lines.
+*         Here's some visual inspiration: http://wttr.in/
+*                                       : https://www.ky3.com/weather/
+*/
+void render_sunny()
+{
+    return;
+}
+
+/**
+* @TODO: Alex
+* @brief: Make some icon that represents rain. Keep it on the top left quadrant
+*         of the screen. We can go back and make everyone's line up nicely later. Use whatever
+*         you want to make the icon, but be sure to include line segments. If you're feeling wild
+*         maybe you can make different icons for different kinds of rain e.g. light rain vs heavy rain.
+*         No pressure though.
+*         Here's some visual inspiration: http://wttr.in/
+*                                       : https://www.ky3.com/weather/
+*/
+void render_raining()
+{
+    return;
+}
+
+/**
+* @TODO: Ben
+* @brief: Make some icon that represents thunder/lightning. Keep it on the top left quadrant
+*         of the screen. We can go back and make everyone's line up nicely later. Use whatever
+*         you want to make the icon, but be sure to include a pattern-filled polygon. Maybe sync
+*         up with Alex to see about encorporating his rain icon if you have time, but that's
+*         definitely a stretch goal you shouldn't stress about.
+*         Here's some visual inspiration: http://wttr.in/
+*                                       : https://www.ky3.com/weather/
+*/
+void render_thunder()
+{
+    return;
+}
+
+/**
+* @TODO: John
+* @brief: Make some icon that represents clouds. Keep it on the top left quadrant
+*         of the screen. We can go back and make everyone's line up nicely later. Use whatever
+*         you want to make the icon, but be sure to include a bitmap. If you want to do a bit
+*         extra, maybe add different icons for partially cloud vs full cloud cover. That's
+*         just a stretch goal if you feel like putting extra time into the project though.
+*         Here's some visual inspiration: http://wttr.in/
+*                                       : https://www.ky3.com/weather/
+*/
+void render_cloudy()
+{
+    return;
 }
