@@ -149,7 +149,6 @@ void get_weather()
 */
 void render_pixelmap()
 {
-	//static const std::string PIXELMAP_FILEPATH = std::filesystem::current_path();
 	static std::vector<unsigned char> background_pixelmap(0);
 	static bool background_assigned = false;
 	static int bg_w = 0, bg_h = 0;
@@ -167,7 +166,7 @@ void render_pixelmap()
         case WeatherCondition::Raining:
         {
 			if (!background_assigned) {
-				background_pixelmap = bmp("C:/TEMP/pixelmaps/bg-rain.bmp", &bg_w, &bg_h);
+				background_pixelmap = bmp("./pixelmaps/bg-rain.bmp", &bg_w, &bg_h);
 				background_assigned = true;
 			}
             break;
@@ -175,7 +174,7 @@ void render_pixelmap()
         case WeatherCondition::Thunder:
         {
 			if (!background_assigned) {
-				background_pixelmap = bmp("C:/TEMP/pixelmaps/bg-thunder.bmp", &bg_w, &bg_h);
+				background_pixelmap = bmp("./pixelmaps/bg-thunder.bmp", &bg_w, &bg_h);
 				background_assigned = true;
 			}
             break;
@@ -183,7 +182,7 @@ void render_pixelmap()
         case WeatherCondition::Cloudy:
         {
 			if (!background_assigned) {
-				background_pixelmap = bmp("C:/TEMP/pixelmaps/bg-clouds.bmp", &bg_w, &bg_h);
+				background_pixelmap = bmp("./pixelmaps/bg-clouds.bmp", &bg_w, &bg_h);
 				background_assigned = true;
 			}
             break;
@@ -191,7 +190,7 @@ void render_pixelmap()
         default:
         {
 			if (!background_assigned) {
-				background_pixelmap = bmp("C:/TEMP/pixelmaps/bg-default.bmp", &bg_w, &bg_h);
+				background_pixelmap = bmp("./pixelmaps/bg-default.bmp", &bg_w, &bg_h);
 				background_assigned = true;
 			}
             break;
