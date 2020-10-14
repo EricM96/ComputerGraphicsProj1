@@ -1,3 +1,18 @@
+/*==================================================================================================
+PROGRAMMERS:			  Daniel Moore
+ COURSE:				  CSC 525/625
+ ASSIGNMENT:			  Project 1
+ LAST MODIFIED DATE:	  10/14/2020
+ DESCRIPTION:			  A header file that processes BMP image files
+ NOTE:					  
+ FILES:					  bmp.h
+ IDE/COMPILER:			  MicroSoft Visual Studio 2019
+ INSTRUCTION FOR COMPILATION AND EXECUTION:
+		1.		Double click on labProj.sln	to OPEN the project
+		2.		Press Ctrl+F7 to COMPILE
+		3.		Press Ctrl+F5 to EXECUTE
+==================================================================================================*/
+
 #pragma once
 #include <iostream>
 #include <fstream>
@@ -23,7 +38,7 @@ std::vector<unsigned char> bmp(std::string filepath, int* w, int* h) {
 	//###############
 
 	int bmp_start = 0;
-	bmp_file.seekg(10); // Header at 0x0A -- Start offset of pixel data
+	bmp_file.seekg(10); // BMP Header at 0x0A -- Start offset of pixel data
 	bmp_file.read((char*)&bmp_start, sizeof(int));
 
 	int width = 0, height = 0;
@@ -39,16 +54,16 @@ std::vector<unsigned char> bmp(std::string filepath, int* w, int* h) {
 	unsigned char r = 0, g = 0, b = 0;
 	
 	// Reads full chunk of pixel data into vector
-	//bmp_file.read((char*)bmp_vec.data(), sizeof(unsigned char) * 3 * width * height);
+	bmp_file.read((char*)bmp_vec.data(), sizeof(unsigned char) * 3 * width * height);
 
-	for (int i = 0; i < width * height * 3; i += 3) {
-		bmp_file.read((char*)&b, sizeof(unsigned char));
-		bmp_file.read((char*)&g, sizeof(unsigned char));
-		bmp_file.read((char*)&r, sizeof(unsigned char));
-		bmp_vec[i] = b;
-		bmp_vec[i + 1] = g;
-		bmp_vec[i + 2] = r;
-	}
+	//for (int i = 0; i < width * height * 3; i += 3) {
+	//	bmp_file.read((char*)&b, sizeof(unsigned char));
+	//	bmp_file.read((char*)&g, sizeof(unsigned char));
+	//	bmp_file.read((char*)&r, sizeof(unsigned char));
+	//	bmp_vec[i] = b;
+	//	bmp_vec[i + 1] = g;
+	//	bmp_vec[i + 2] = r;
+	//}
 
 	bmp_file.close(); // Close bmp file
 
