@@ -20,15 +20,14 @@ PROGRAMMERS:			  Eric McCullough
 ==================================================================================================*/
 #include <GL/glut.h> // include GLUT library
 
+#include <math.h>
 #include <iostream>
-#include <filesystem>
 #include <string>
 #include <WinSock2.h>
 #include <Windows.h>
 #include <vector>
 #include <sstream>
-#include <math.h>
-#include "bmp.h"
+#pragma warning(suppress : 4996)
 #pragma comment(lib, "ws2_32.lib")
 #define M_PI 3.14159265358979323846 /* pi */
 //********* Prototypes **************************************************************
@@ -115,6 +114,7 @@ std::string *get_Weather()
     }
 
     Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#pragma warning(suppress : 4996)
     host = gethostbyname("wttr.in");
 
     SockAddr.sin_port = htons(80);
@@ -245,9 +245,8 @@ void displayCallback()
 //***********************************************************************************
 void draw()
 {
-    render_pixelmap();
     render_text();
-
+    render_pixelmap();
     switch (weather_condition)
     {
     case WeatherCondition::Clear:
@@ -288,62 +287,29 @@ void draw()
 */
 void render_pixelmap()
 {
-    static std::vector<unsigned char> background_pixelmap(0);
-    static bool background_assigned = false;
-    static int bg_w = 0, bg_h = 0;
-
     switch (weather_condition)
     {
     case WeatherCondition::Clear:
     {
-        if (!background_assigned)
-        {
-            background_pixelmap = bmp("./pixelmaps/bg-clear.bmp", &bg_w, &bg_h);
-            background_assigned = true;
-        }
         break;
     }
     case WeatherCondition::Raining:
     {
-        if (!background_assigned)
-        {
-            background_pixelmap = bmp("./pixelmaps/bg-rain.bmp", &bg_w, &bg_h);
-            background_assigned = true;
-        }
         break;
     }
     case WeatherCondition::Thunder:
     {
-        if (!background_assigned)
-        {
-            background_pixelmap = bmp("./pixelmaps/bg-thunder.bmp", &bg_w, &bg_h);
-            background_assigned = true;
-        }
         break;
     }
     case WeatherCondition::Cloudy:
     {
-        if (!background_assigned)
-        {
-            background_pixelmap = bmp("./pixelmaps/bg-clouds.bmp", &bg_w, &bg_h);
-            background_assigned = true;
-        }
         break;
     }
     default:
     {
-        if (!background_assigned)
-        {
-            background_pixelmap = bmp("./pixelmaps/bg-default.bmp", &bg_w, &bg_h);
-            background_assigned = true;
-        }
         break;
     }
     }
-
-    //Display the pixelmap
-    glRasterPos2i(-300, -300);
-    glDrawPixels(bg_w, bg_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, background_pixelmap.data());
 }
 
 /**
