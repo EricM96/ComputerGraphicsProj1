@@ -20,14 +20,16 @@ PROGRAMMERS:			  Eric McCullough
 ==================================================================================================*/
 #include <GL/glut.h>  // include GLUT library
 
+#include <math.h>
 #include <iostream>
 #include <string>
 #include <WinSock2.h>
 #include <Windows.h>
 #include <vector>
 #include <sstream>
+#pragma warning(suppress : 4996)
 #pragma comment(lib, "ws2_32.lib")
-
+# define M_PI           3.14159265358979323846  /* pi */
 //********* Prototypes **************************************************************
 void init();
 void displayCallback();
@@ -86,7 +88,7 @@ int main(int argc, char** argv)
 * @Author: Eric McCullough
 * @Params: none
 * @Return: a pointer to a string containing the weather report in JSON format
-* @Brief: Makes an HTTP get request to wttr.in using Windows sockets and returns a pointer to 
+* @Brief: Makes an HTTP get request to wttr.in using Windows sockets and returns a pointer to
 *         a string containing the servers response.
 */
 std::string* get_Weather() {
@@ -97,7 +99,7 @@ std::string* get_Weather() {
     int rowCount = 0;
     struct hostent* host;
     std::string get_http;
-    char *buffer = new char[50000];
+    char* buffer = new char[50000];
     std::string* json = new std::string{ "" };
 
 
@@ -110,6 +112,7 @@ std::string* get_Weather() {
     }
 
     Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    
     host = gethostbyname("wttr.in");
 
     SockAddr.sin_port = htons(80);
@@ -158,41 +161,41 @@ void parse_json(std::string* json)
     size_t cond_code = std::stoi(json->substr(cond_idx + cond.length() + offset, 3));
     switch (cond_code)
     {
-        case (113):
-        {
-            weather_condition = WeatherCondition::Clear;
-            break;
-        }
-        case(359):
-        case(356):
-        case(353):
-        case(308):
-        case(305):
-        case(302):
-        case(299):
-        case(296):
-        case(293):
-        {
-            weather_condition = WeatherCondition::Raining;
-            break;
-        }
-        case(389):
-        case(386):
-        {
-            weather_condition = WeatherCondition::Thunder;
-            break;
-        }
-        case(119):
-        case(116):
-        {
-            weather_condition = WeatherCondition::Cloudy;
-            break;
-        }
-        default:
-        {
-            weather_condition = WeatherCondition::Clear;
-            break;
-        }
+    case (113):
+    {
+        weather_condition = WeatherCondition::Clear;
+        break;
+    }
+    case(359):
+    case(356):
+    case(353):
+    case(308):
+    case(305):
+    case(302):
+    case(299):
+    case(296):
+    case(293):
+    {
+        weather_condition = WeatherCondition::Raining;
+        break;
+    }
+    case(389):
+    case(386):
+    {
+        weather_condition = WeatherCondition::Thunder;
+        break;
+    }
+    case(119):
+    case(116):
+    {
+        weather_condition = WeatherCondition::Cloudy;
+        break;
+    }
+    default:
+    {
+        weather_condition = WeatherCondition::Clear;
+        break;
+    }
     }
 
     temp_idx = json->find(temp_key);
@@ -236,38 +239,37 @@ void displayCallback()
 
 
 //***********************************************************************************
-void draw() 
+void draw()
 {
     render_text();
     render_pixelmap();
-
     switch (weather_condition)
     {
     case WeatherCondition::Clear:
-        {
-            render_sunny();
-            break;
-        }
-        case WeatherCondition::Raining:
-        {
-            render_raining();
-            break;
-        }
-        case WeatherCondition::Thunder:
-        {
-            render_thunder();
-            break;
-        }
-        case WeatherCondition::Cloudy:
-        {
-            render_cloudy();
-            break;
-        }
-        default:
-        {
-            render_sunny();
-            break;
-        }
+    {
+        render_sunny();
+        break;
+    }
+    case WeatherCondition::Raining:
+    {
+        render_raining();
+        break;
+    }
+    case WeatherCondition::Thunder:
+    {
+        render_thunder();
+        break;
+    }
+    case WeatherCondition::Cloudy:
+    {
+        render_cloudy();
+        break;
+    }
+    default:
+    {
+        render_sunny();
+        break;
+    }
     }
 }
 
@@ -283,26 +285,26 @@ void render_pixelmap()
 {
     switch (weather_condition)
     {
-        case WeatherCondition::Clear:
-        {
-            break;
-        }
-        case WeatherCondition::Raining:
-        {
-            break;
-        }
-        case WeatherCondition::Thunder:
-        {
-            break;
-        }
-        case WeatherCondition::Cloudy:
-        {
-            break;
-        }
-        default:
-        {
-            break;
-        }
+    case WeatherCondition::Clear:
+    {
+        break;
+    }
+    case WeatherCondition::Raining:
+    {
+        break;
+    }
+    case WeatherCondition::Thunder:
+    {
+        break;
+    }
+    case WeatherCondition::Cloudy:
+    {
+        break;
+    }
+    default:
+    {
+        break;
+    }
     }
 }
 
@@ -329,7 +331,47 @@ void render_text()
 */
 void render_sunny()
 {
-    return;
+    float x, y;		// x, y for current point
+    int r = 75;		// radius
+    int cx = -150;		// center x
+    int cy = 150;	// center y
+    glColor3ub(228, 188, 63);
+    glLineWidth(3);
+
+    glBegin(GL_LINE_LOOP);
+    for (float theta = 0; theta <= 360; theta += .5)		// iterate from 180 to 360 degrees to draw a half circle
+    {
+        x = r * cos(theta * M_PI / 180) + cx;				// convert degrees to radians and follow formula 1 from lab
+        y = r * sin(theta * M_PI / 180) + cy;
+        glVertex2f(x, y);									// draw vertex
+    }
+    glEnd();
+    glBegin(GL_LINES);
+    //Line on top of circle
+    glVertex2i(cx, cy + r);
+    glVertex2i(cx, cy + 125);
+    //Line on bottom of circle
+    glVertex2i(cx, cy - r);
+    glVertex2i(cx, cy - 125);
+    //Line on right side of circle
+    glVertex2i(cx + r, cy);
+    glVertex2i(cx + r + 50, cy);
+    //line on left side of circle
+    glVertex2i(cx - r, cy);
+    glVertex2i(cx - r - 50, cy);
+    //line on top right side of circle
+    glVertex2i(cx + 52, cy + 52);
+    glVertex2i(cx + 92, cy + 92);
+    //line on top left side of circle
+    glVertex2i(cx - 52, cy + 52);
+    glVertex2i(cx - 92, cy + 92);
+    //line on bottom right side of circle
+    glVertex2i(cx + 52, cy - 52);
+    glVertex2i(cx + 92, cy - 92);
+    //line on bottom left side of circle
+    glVertex2i(cx - 52, cy - 52);
+    glVertex2i(cx - 92, cy - 92);
+    glEnd();
 }
 
 /**
