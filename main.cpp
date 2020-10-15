@@ -101,7 +101,7 @@ std::string* get_Weather() {
     std::string* json = new std::string{ "" };
 
 
-    get_http = "GET /path?format=j1 HTTP/1.1\r\nHost: wttr.in\r\nConnection: close\r\n\r\n";
+    get_http = "GET /Springfield+Missouri?format=j1 HTTP/1.1\r\nHost: wttr.in\r\nConnection: close\r\n\r\n";
 
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cout << "WSAStartup failed.\n";
