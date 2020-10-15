@@ -27,6 +27,7 @@ PROGRAMMERS:			  Eric McCullough
 #include <vector>
 #include <sstream>
 #pragma comment(lib, "ws2_32.lib")
+#pragma warning(disable : 4996)
 
 //********* Prototypes **************************************************************
 void init();
@@ -359,7 +360,66 @@ void render_raining()
 */
 void render_thunder()
 {
-    return;
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 1.0, 0.0);
+
+    int p1[] = { 165, 450 };
+    int p2[] = { 85,250 };
+    int p3[] = { 155, 300 };
+
+
+    glBegin(GL_POLYGON);
+    glVertex2iv(p1);
+    glVertex2iv(p2);
+    glVertex2iv(p3);
+    glEnd();
+
+    int p4[] = { 85, 250 };
+    int p5[] = { 160, 265 };
+    int p6[] = { 250, 305 };
+    int p7[] = { 155, 300 };
+
+    glBegin(GL_POLYGON);
+    glVertex2iv(p4);
+    glVertex2iv(p5);
+    glVertex2iv(p6);
+    glVertex2iv(p7);
+    glEnd();
+
+    int p8[] = { 100, 80 };
+
+    glBegin(GL_POLYGON);
+    glVertex2iv(p5);
+    glVertex2iv(p8);
+    glVertex2iv(p6);
+    glEnd();
+
+    float theta;
+    glColor3f(0.5, 0.5, 0.5);
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < 360; i++) {
+        theta = i * 3.142 / 180;
+        glVertex2f(110 + 100 * cos(theta), 360 + 50 * sin(theta));
+
+    }
+    glEnd();
+
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < 360; i++) {
+        theta = i * 3.142 / 180;
+        glVertex2f(180 + 90 * cos(theta), 400 + 50 * sin(theta));
+    }
+    glEnd();
+
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < 360; i++) {
+        theta = i * 3.142 / 180;
+        glVertex2f(220 + 100 * cos(theta), 360 + 50 * sin(theta));
+
+    }
+    glEnd();
+
+    glFlush();
 }
 
 /**
