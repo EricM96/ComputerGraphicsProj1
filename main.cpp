@@ -39,6 +39,7 @@ std::string* get_Weather();
 void parse_json(std::string*);
 void draw();
 void render_pixelmap();
+void drawText(std::string text, int length, int x, int y);
 void render_text();
 void render_sunny();
 void render_raining();
@@ -53,8 +54,8 @@ enum class WeatherCondition {
     Cloudy
 };
 
-WeatherCondition weather_condition = WeatherCondition::Clear;
-std::string weather_condition_str = "Clear";
+WeatherCondition weather_condition = WeatherCondition::Thunder;
+std::string weather_condition_str = "Thunder";
 std::string temp = "10 - 11";
 std::string wind_heading = "north";
 std::string wind_speed = "24";
@@ -65,9 +66,9 @@ std::string precip_prob = "0.0"; // Chance of rain
 //********* Main Method **************************************************************
 int main(int argc, char** argv)
 {
-    std::string* weather_json = get_Weather();
-    parse_json(weather_json);
-    delete(weather_json);
+    //std::string* weather_json = get_Weather();
+    //parse_json(weather_json);
+    //delete(weather_json);
 
     glutInit(&argc, argv);  // initialization
 
@@ -309,7 +310,7 @@ void render_pixelmap()
         case WeatherCondition::Thunder:
         {
 			if (!background_assigned) {
-				background_pixelmap = bmp("./pixelmaps/bg-thunder.bmp", &bg_w, &bg_h);
+                background_pixelmap = bmp("./pixelmaps/bg-thunder.bmp", &bg_w, &bg_h);
 				background_assigned = true;
 			}
             break;
@@ -346,11 +347,43 @@ void render_pixelmap()
 *         here's some visual inspiration: http://wttr.in/
 *                                       : https://www.ky3.com/weather/
 */
-void render_text()
+void drawText(std::string text, int length, int x, int y)
 {
-    return;
+    glRasterPos2i(x, y);
+    for (auto c: text)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, (int)c);
+    }
 }
 
+void render_text()
+{
+    //start testing
+    glPointSize(1); // change point size back to 1
+    ////draw text
+    glColor3ub(0, 0, 0);
+    std::string text1;
+    std::string text2;
+    std::string text3;
+    std::string text4;
+    std::string text5;
+    std::string text6;
+    std::string text7;
+    text1 = weather_condition_str;
+    text2 = temp + " degrees F";
+    text3 = wind_heading;
+    text4 = wind_speed + " MPH";
+    text5 = visibility + " mi";
+    text6 = precip_in + " in";
+    text7 = precip_prob + " % chance of rain";
+    drawText(text1, text1.length(), 80, 220);
+    drawText(text2, text2.length(), 80, 200);
+    drawText(text3, text3.length(), 80, 180);
+    drawText(text4, text4.length(), 80, 160);
+    drawText(text5, text5.length(), 80, 140);
+    drawText(text6, text6.length(), 80, 120);
+    drawText(text7, text7.length(), 80, 100);
+}
 /**
 * @todo: dallas
 * @brief: make some icon that represents clear or sunny weather. keep it on the top left quadrant
@@ -391,12 +424,12 @@ void render_raining()
 */
 void render_thunder()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 1.0, 0.0);
 
-    int p1[] = { 165, 450 };
-    int p2[] = { 85,250 };
-    int p3[] = { 155, 300 };
+    int p1[] = { -135, 150 };
+    int p2[] = { -215,-50 };
+    int p3[] = { -145, 0 };
 
 
     glBegin(GL_POLYGON);
@@ -405,10 +438,10 @@ void render_thunder()
     glVertex2iv(p3);
     glEnd();
 
-    int p4[] = { 85, 250 };
-    int p5[] = { 160, 265 };
-    int p6[] = { 250, 305 };
-    int p7[] = { 155, 300 };
+    int p4[] = { -215, -50 };
+    int p5[] = { -140, -35 };
+    int p6[] = { -50, 5 };
+    int p7[] = { -145, 0 };
 
     glBegin(GL_POLYGON);
     glVertex2iv(p4);
@@ -417,7 +450,7 @@ void render_thunder()
     glVertex2iv(p7);
     glEnd();
 
-    int p8[] = { 100, 80 };
+    int p8[] = { -200, -220 };
 
     glBegin(GL_POLYGON);
     glVertex2iv(p5);
@@ -430,7 +463,7 @@ void render_thunder()
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i++) {
         theta = i * 3.142 / 180;
-        glVertex2f(110 + 100 * cos(theta), 360 + 50 * sin(theta));
+        glVertex2f(-190 + 100 * cos(theta), 60 + 50 * sin(theta));
 
     }
     glEnd();
@@ -438,19 +471,17 @@ void render_thunder()
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i++) {
         theta = i * 3.142 / 180;
-        glVertex2f(180 + 90 * cos(theta), 400 + 50 * sin(theta));
+        glVertex2f(-120 + 90 * cos(theta), 100 + 50 * sin(theta));
     }
     glEnd();
 
     glBegin(GL_POLYGON);
     for (int i = 0; i < 360; i++) {
         theta = i * 3.142 / 180;
-        glVertex2f(220 + 100 * cos(theta), 360 + 50 * sin(theta));
+        glVertex2f(-80 + 100 * cos(theta), 60 + 50 * sin(theta));
 
     }
     glEnd();
-
-    glFlush();
 }
 
 /**
