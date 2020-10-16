@@ -67,6 +67,12 @@ std::string visibility = "9";
 std::string precip_in = "0.0";   // How much rainfall is expected in inches
 std::string precip_prob = "0.0"; // Chance of rain
 
+std::vector<unsigned char> BG_DEFAULT{ bmp("./pixelmaps/bg-default.bmp") };
+std::vector<unsigned char> BG_CLEAR{ bmp("./pixelmaps/bg-clear.bmp") };
+std::vector<unsigned char> BG_RAIN{ bmp("./pixelmaps/bg-rain.bmp") };
+std::vector<unsigned char> BG_THUNDER{ bmp("./pixelmaps/bg-thunder.bmp") };
+std::vector<unsigned char> BG_CLOUDY{ bmp("./pixelmaps/bg-clouds.bmp") };
+
 //********* Main Method **************************************************************
 int main(int argc, char **argv)
 {
@@ -103,12 +109,15 @@ void mouseCallbackHandler(int button, int state, int x, int y) {
 		case 1:
 			++counter;
 			weather_condition = WeatherCondition::Thunder;
+			break;
 		case 2:
 			++counter;
 			weather_condition = WeatherCondition::Cloudy;
+			break;
 		case 3:
 			weather_condition = WeatherCondition::Clear;
 			counter = 0;
+			break;
 		}
 		glutPostRedisplay();
 	}
@@ -321,50 +330,33 @@ void draw()
 */
 void render_pixelmap()
 {
-	static std::vector<unsigned char> background_pixelmap(0);
-	static bool background_assigned = false;
-	static int bg_w = 0, bg_h = 0;
+	static std::vector<unsigned char> &background_pixelmap = BG_DEFAULT;
 
     switch (weather_condition)
     {
         case WeatherCondition::Clear:
         {
-			if (!background_assigned) {
-				background_pixelmap = bmp("./pixelmaps/bg-clear.bmp", &bg_w, &bg_h);
-				background_assigned = true;
-			}
+			background_pixelmap = BG_CLEAR;
             break;
         }
         case WeatherCondition::Raining:
         {
-			if (!background_assigned) {
-				background_pixelmap = bmp("./pixelmaps/bg-rain.bmp", &bg_w, &bg_h);
-				background_assigned = true;
-			}
+			background_pixelmap = BG_RAIN;
             break;
         }
         case WeatherCondition::Thunder:
         {
-			if (!background_assigned) {
-                background_pixelmap = bmp("./pixelmaps/bg-thunder.bmp", &bg_w, &bg_h);
-				background_assigned = true;
-			}
+            background_pixelmap = BG_THUNDER;
             break;
         }
         case WeatherCondition::Cloudy:
         {
-			if (!background_assigned) {
-				background_pixelmap = bmp("./pixelmaps/bg-clouds.bmp", &bg_w, &bg_h);
-				background_assigned = true;
-			}
+			background_pixelmap = BG_CLOUDY;
             break;
         }
         default:
         {
-			if (!background_assigned) {
-				background_pixelmap = bmp("./pixelmaps/bg-default.bmp", &bg_w, &bg_h);
-				background_assigned = true;
-			}
+			background_pixelmap = BG_DEFAULT;
             break;
         }
     }
@@ -376,7 +368,7 @@ void render_pixelmap()
 	else {
 		//Display the pixelmap
 		glRasterPos2i(-300, -300);
-		glDrawPixels(bg_w, bg_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, background_pixelmap.data());
+		glDrawPixels(600, 600, GL_BGR_EXT, GL_UNSIGNED_BYTE, background_pixelmap.data());
 	}
 }
 

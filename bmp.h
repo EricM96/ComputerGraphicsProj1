@@ -24,7 +24,7 @@ PROGRAMMERS:			  Daniel Moore
 // Note: The BMP file MUST be in 24-bit color with no compression.
 //      The returned pixel map is in reverse order, BGR, instead of RGB.
 //      Returns an empty vector (size 0) if the BMP image could not be loaded.
-std::vector<unsigned char> bmp(std::string filepath, int* w, int* h) {
+std::vector<unsigned char> bmp(std::string filepath) {
 	std::vector<unsigned char> bmp_vec(0); //Initialize empty vector
 	std::ifstream bmp_file(filepath, std::ios::binary);
 
@@ -66,9 +66,6 @@ std::vector<unsigned char> bmp(std::string filepath, int* w, int* h) {
 	//}
 
 	bmp_file.close(); // Close bmp file
-
-	*w = width;
-	*h = height;
 
 	return bmp_vec;
 }
