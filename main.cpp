@@ -37,6 +37,7 @@ PROGRAMMERS:			  Eric McCullough
 void init();
 void displayCallback();
 
+void mouseCallbackHandler(int button, int state, int x, int y);
 std::string *get_Weather();
 void parse_json(std::string *);
 void draw();
@@ -57,7 +58,7 @@ enum class WeatherCondition
     Cloudy
 };
 
-WeatherCondition weather_condition = WeatherCondition::Clear;
+WeatherCondition weather_condition = WeatherCondition::Raining;
 std::string weather_condition_str = "Thunder";
 std::string temp = "10 - 11";
 std::string wind_heading = "north";
@@ -69,15 +70,16 @@ std::string precip_prob = "0.0"; // Chance of rain
 //********* Main Method **************************************************************
 int main(int argc, char **argv)
 {
-    std::string* weather_json = get_Weather();
-    parse_json(weather_json);
-    delete(weather_json);
+    //std::string* weather_json = get_Weather();
+    //parse_json(weather_json);
+    //delete(weather_json);
 
     glutInit(&argc, argv); // initialization
 
     glutInitWindowSize(600, 600);   // specify a window size
     glutInitWindowPosition(100, 0); // specify a window position
     glutCreateWindow("wttr.in");    // create a titled window
+	glutMouseFunc(mouseCallbackHandler);
 
     init(); // specify some settings
 
@@ -89,6 +91,28 @@ int main(int argc, char **argv)
 }
 
 //********* Subroutines **************************************************************
+//***********************************************************************************
+void mouseCallbackHandler(int button, int state, int x, int y) {
+	static size_t counter = 0;
+	if (state == GLUT_DOWN) {
+		switch (counter) {
+		case 0:
+			++counter;
+			weather_condition = WeatherCondition::Raining;
+			break;
+		case 1:
+			++counter;
+			weather_condition = WeatherCondition::Thunder;
+		case 2:
+			++counter;
+			weather_condition = WeatherCondition::Cloudy;
+		case 3:
+			weather_condition = WeatherCondition::Clear;
+			counter = 0;
+		}
+		glutPostRedisplay();
+	}
+}
 /*
 * @Author: Eric McCullough
 * @Params: none
@@ -258,31 +282,32 @@ void draw()
 
     switch (weather_condition)
     {
-    case WeatherCondition::Clear:
-    {
-        render_sunny();
-        break;
-    }
-    case WeatherCondition::Raining:
-    {
-        render_raining();
-        break;
-    }
-    case WeatherCondition::Thunder:
-    {
-        render_thunder();
-        break;
-    }
-    case WeatherCondition::Cloudy:
-    {
-        render_cloudy();
-        break;
-    }
-    default:
-    {
-        render_sunny();
-        break;
-    }
+		case WeatherCondition::Clear:
+		{
+			render_sunny();
+			break;
+		}
+		case WeatherCondition::Raining:
+		{
+			render_cloudy();
+			render_raining();
+			break;
+		}
+		case WeatherCondition::Thunder:
+		{
+			render_thunder();
+			break;
+		}
+		case WeatherCondition::Cloudy:
+		{
+			render_cloudy();
+			break;
+		}
+		default:
+		{
+			render_sunny();
+			break;
+		}
     }
 }
 
@@ -344,10 +369,15 @@ void render_pixelmap()
         }
     }
 
-	//Display the pixelmap
-	glRasterPos2i(-300, -300);
-	glDrawPixels(bg_w, bg_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, background_pixelmap.data());
-
+	if (background_pixelmap.size() < 2) {
+		drawText("Failed to draw pixelmap, make sure" , 0, -300, -278);
+		drawText("'pixelmaps' folder is next to executable.", 0, -300, -298);
+	}
+	else {
+		//Display the pixelmap
+		glRasterPos2i(-300, -300);
+		glDrawPixels(bg_w, bg_h, GL_BGR_EXT, GL_UNSIGNED_BYTE, background_pixelmap.data());
+	}
 }
 
 /**
@@ -360,6 +390,7 @@ void render_pixelmap()
 */
 void drawText(std::string text, int length, int x, int y)
 {
+	glColor3ub(0, 0, 0);
     glRasterPos2i(x, y);
     for (auto c: text)
     {
@@ -372,7 +403,6 @@ void render_text()
     //start testing
     glPointSize(1); // change point size back to 1
     ////draw text
-    glColor3ub(0, 0, 0);
     std::string text1;
     std::string text2;
     std::string text3;
@@ -460,7 +490,75 @@ void render_sunny()
 */
 void render_raining()
 {
-    return;
+	/**
+	Code for the rain */
+	glColor3f(0.0, 0.0, 1.0);     // Blue
+	glBegin(GL_LINES);
+	glVertex2i(-165, -50);
+	glVertex2i(-162, -60);
+	glVertex2i(-157, -50);
+	glVertex2i(-154, -60);
+	glVertex2i(-174, -50);
+	glVertex2i(-171, -60);
+
+	glVertex2i(-160, -62);
+	glVertex2i(-157, -72);
+	glVertex2i(-152, -62);
+	glVertex2i(-149, -72);
+	glVertex2i(-169, -62);
+	glVertex2i(-166, -72);
+
+	glVertex2i(-155, -74);
+	glVertex2i(-152, -84);
+	glVertex2i(-147, -74);
+	glVertex2i(-144, -84);
+	glVertex2i(-164, -74);
+	glVertex2i(-161, -84);
+
+	glVertex2i(-150, -50);
+	glVertex2i(-147, -60);
+	glVertex2i(-142, -50);
+	glVertex2i(-139, -60);
+	glVertex2i(-134, -50);
+	glVertex2i(-131, -60);
+
+	glVertex2i(-145, -62);
+	glVertex2i(-142, -72);
+	glVertex2i(-137, -62);
+	glVertex2i(-134, -72);
+	glVertex2i(-129, -62);
+	glVertex2i(-126, -72);
+
+	glVertex2i(-140, -74);
+	glVertex2i(-137, -84);
+	glVertex2i(-132, -74);
+	glVertex2i(-129, -84);
+	glVertex2i(-124, -74);
+	glVertex2i(-121, -84);
+
+	glVertex2i(-110, -50);
+	glVertex2i(-107, -60);
+	glVertex2i(-127, -50);
+	glVertex2i(-124, -60);
+	glVertex2i(-119, -50);
+	glVertex2i(-116, -60);
+
+	glVertex2i(-105, -62);
+	glVertex2i(-102, -72);
+	glVertex2i(-122, -62);
+	glVertex2i(-119, -72);
+	glVertex2i(-114, -62);
+	glVertex2i(-111, -72);
+
+	glVertex2i(-100, -74);
+	glVertex2i(-97, -84);
+	glVertex2i(-117, -74);
+	glVertex2i(-114, -84);
+	glVertex2i(-109, -74);
+	glVertex2i(-106, -84);
+
+	glEnd();
+	glutSwapBuffers();
 }
 
 /**
@@ -850,8 +948,8 @@ void render_cloudy()
 	  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	};
 
-	glRasterPos2f(-300, -150);
 	glColor3f(0.5, 0.5, 0.5);
+	glRasterPos2f(-300, -150);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
 	glBitmap(300, 300,
 		0, 0,
