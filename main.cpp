@@ -57,7 +57,7 @@ enum class WeatherCondition
     Cloudy
 };
 
-WeatherCondition weather_condition = WeatherCondition::Thunder;
+WeatherCondition weather_condition = WeatherCondition::Clear;
 std::string weather_condition_str = "Thunder";
 std::string temp = "10 - 11";
 std::string wind_heading = "north";
@@ -69,9 +69,9 @@ std::string precip_prob = "0.0"; // Chance of rain
 //********* Main Method **************************************************************
 int main(int argc, char **argv)
 {
-    //std::string* weather_json = get_Weather();
-    //parse_json(weather_json);
-    //delete(weather_json);
+    std::string* weather_json = get_Weather();
+    parse_json(weather_json);
+    delete(weather_json);
 
     glutInit(&argc, argv); // initialization
 
@@ -172,6 +172,7 @@ void parse_json(std::string *json)
     case (113):
     {
         weather_condition = WeatherCondition::Clear;
+        weather_condition_str = "Clear";
         break;
     }
     case (359):
@@ -185,23 +186,27 @@ void parse_json(std::string *json)
     case (293):
     {
         weather_condition = WeatherCondition::Raining;
+        weather_condition_str = "Rain";
         break;
     }
     case (389):
     case (386):
     {
         weather_condition = WeatherCondition::Thunder;
+        weather_condition_str = "Storming";
         break;
     }
     case (119):
     case (116):
     {
         weather_condition = WeatherCondition::Cloudy;
+        weather_condition_str = "Cloudy";
         break;
     }
     default:
     {
         weather_condition = WeatherCondition::Clear;
+        weather_condition_str = "Clear";
         break;
     }
     }
