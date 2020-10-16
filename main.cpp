@@ -18,8 +18,9 @@ PROGRAMMERS:			  Eric McCullough
         2.		Press Ctrl+F7 to COMPILE
         3.		Press Ctrl+F5 to EXECUTE
 ==================================================================================================*/
-#include <GL/glut.h>  // include GLUT library
+#include <GL/glut.h> // include GLUT library
 
+#include <math.h>
 #include <iostream>
 #include <filesystem>
 #include <string>
@@ -27,16 +28,17 @@ PROGRAMMERS:			  Eric McCullough
 #include <Windows.h>
 #include <vector>
 #include <sstream>
-#include "bmp.h"
-#pragma comment(lib, "ws2_32.lib")
 #pragma warning(disable : 4996)
+#pragma comment(lib, "ws2_32.lib")
+#define M_PI 3.14159265358979323846 /* pi */
+#include "bmp.h"
 
 //********* Prototypes **************************************************************
 void init();
 void displayCallback();
 
-std::string* get_Weather();
-void parse_json(std::string*);
+std::string *get_Weather();
+void parse_json(std::string *);
 void draw();
 void render_pixelmap();
 void drawText(std::string text, int length, int x, int y);
@@ -47,7 +49,8 @@ void render_thunder();
 void render_cloudy();
 
 //********** Globals ****************************************************************
-enum class WeatherCondition {
+enum class WeatherCondition
+{
     Clear,
     Raining,
     Thunder,
@@ -60,29 +63,29 @@ std::string temp = "10 - 11";
 std::string wind_heading = "north";
 std::string wind_speed = "24";
 std::string visibility = "9";
-std::string precip_in = "0.0";  // How much rainfall is expected in inches
+std::string precip_in = "0.0";   // How much rainfall is expected in inches
 std::string precip_prob = "0.0"; // Chance of rain
 
 //********* Main Method **************************************************************
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     //std::string* weather_json = get_Weather();
     //parse_json(weather_json);
     //delete(weather_json);
 
-    glutInit(&argc, argv);  // initialization
+    glutInit(&argc, argv); // initialization
 
-    glutInitWindowSize(600, 600);                // specify a window size
-    glutInitWindowPosition(100, 0);              // specify a window position
-    glutCreateWindow("wttr.in");  // create a titled window
+    glutInitWindowSize(600, 600);   // specify a window size
+    glutInitWindowPosition(100, 0); // specify a window position
+    glutCreateWindow("wttr.in");    // create a titled window
 
-    init();  // specify some settings
+    init(); // specify some settings
 
-    glutDisplayFunc(displayCallback);  // register a callback
+    glutDisplayFunc(displayCallback); // register a callback
 
-    glutMainLoop();  // get into an infinite loop
+    glutMainLoop(); // get into an infinite loop
 
-    return 1;  // something wrong happened
+    return 1; // something wrong happened
 }
 
 //********* Subroutines **************************************************************
@@ -90,24 +93,25 @@ int main(int argc, char** argv)
 * @Author: Eric McCullough
 * @Params: none
 * @Return: a pointer to a string containing the weather report in JSON format
-* @Brief: Makes an HTTP get request to wttr.in using Windows sockets and returns a pointer to 
+* @Brief: Makes an HTTP get request to wttr.in using Windows sockets and returns a pointer to
 *         a string containing the servers response.
 */
-std::string* get_Weather() {
+std::string *get_Weather()
+{
     WSADATA wsaData;
     SOCKET Socket;
     SOCKADDR_IN SockAddr;
     int lineCount = 0;
     int rowCount = 0;
-    struct hostent* host;
+    struct hostent *host;
     std::string get_http;
     char *buffer = new char[50000];
-    std::string* json = new std::string{ "" };
-
+    std::string *json = new std::string{""};
 
     get_http = "GET /Springfield+Missouri?format=j1 HTTP/1.1\r\nHost: wttr.in\r\nConnection: close\r\n\r\n";
 
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    {
         std::cout << "WSAStartup failed.\n";
         system("pause");
         //return 1;
@@ -118,17 +122,20 @@ std::string* get_Weather() {
 
     SockAddr.sin_port = htons(80);
     SockAddr.sin_family = AF_INET;
-    SockAddr.sin_addr.s_addr = *((unsigned long*)host->h_addr);
+    SockAddr.sin_addr.s_addr = *((unsigned long *)host->h_addr);
 
-    if (connect(Socket, (SOCKADDR*)(&SockAddr), sizeof(SockAddr)) != 0) {
+    if (connect(Socket, (SOCKADDR *)(&SockAddr), sizeof(SockAddr)) != 0)
+    {
         std::cout << "Could not connect";
     }
     send(Socket, get_http.c_str(), strlen(get_http.c_str()), 0);
 
     int nDataLength;
-    while ((nDataLength = recv(Socket, buffer, 50000, 0)) > 0) {
+    while ((nDataLength = recv(Socket, buffer, 50000, 0)) > 0)
+    {
         int i = 0;
-        while (buffer[i] >= 32 || buffer[i] == '\n' || buffer[i] == '\r') {
+        while (buffer[i] >= 32 || buffer[i] == '\n' || buffer[i] == '\r')
+        {
 
             *json += buffer[i];
             i += 1;
@@ -150,53 +157,53 @@ std::string* get_Weather() {
 * @Brief: Parses json and instantiates the global variables concerning the current weather report
 *         which are used in the rendering logic
 */
-void parse_json(std::string* json)
+void parse_json(std::string *json)
 {
-    const std::string cond{ "weatherCode\"" }, temp_key{ "temp_F\"" }, wind_dir{ "winddir16Point\"" }, wind_speed_key{ "windspeedMiles\"" },
-        precip{ "precipMM\"" }, precip_chance{ "chanceofrain\"" };
+    const std::string cond{"weatherCode\""}, temp_key{"temp_F\""}, wind_dir{"winddir16Point\""}, wind_speed_key{"windspeedMiles\""},
+        precip{"precipMM\""}, precip_chance{"chanceofrain\""};
     size_t cond_idx, temp_idx, wind_dir_idx, wind_speed_idx, visibility_idx, precip_idx, precip_chance_idx;
-    const size_t offset{ 3 };
+    const size_t offset{3};
     size_t begin_search;
 
     cond_idx = json->find(cond);
     size_t cond_code = std::stoi(json->substr(cond_idx + cond.length() + offset, 3));
     switch (cond_code)
     {
-        case (113):
-        {
-            weather_condition = WeatherCondition::Clear;
-            break;
-        }
-        case(359):
-        case(356):
-        case(353):
-        case(308):
-        case(305):
-        case(302):
-        case(299):
-        case(296):
-        case(293):
-        {
-            weather_condition = WeatherCondition::Raining;
-            break;
-        }
-        case(389):
-        case(386):
-        {
-            weather_condition = WeatherCondition::Thunder;
-            break;
-        }
-        case(119):
-        case(116):
-        {
-            weather_condition = WeatherCondition::Cloudy;
-            break;
-        }
-        default:
-        {
-            weather_condition = WeatherCondition::Clear;
-            break;
-        }
+    case (113):
+    {
+        weather_condition = WeatherCondition::Clear;
+        break;
+    }
+    case (359):
+    case (356):
+    case (353):
+    case (308):
+    case (305):
+    case (302):
+    case (299):
+    case (296):
+    case (293):
+    {
+        weather_condition = WeatherCondition::Raining;
+        break;
+    }
+    case (389):
+    case (386):
+    {
+        weather_condition = WeatherCondition::Thunder;
+        break;
+    }
+    case (119):
+    case (116):
+    {
+        weather_condition = WeatherCondition::Cloudy;
+        break;
+    }
+    default:
+    {
+        weather_condition = WeatherCondition::Clear;
+        break;
+    }
     }
 
     temp_idx = json->find(temp_key);
@@ -224,23 +231,22 @@ void parse_json(std::string* json)
 //***********************************************************************************
 void init()
 {
-    glClearColor(1, 1, 1, 0);          // specify a background clor: white
-    gluOrtho2D(-300, 300, -300, 300);  // specify a viewing area
+    glClearColor(1, 1, 1, 0);         // specify a background clor: white
+    gluOrtho2D(-300, 300, -300, 300); // specify a viewing area
 }
 
 //***********************************************************************************
 void displayCallback()
 {
-    glClear(GL_COLOR_BUFFER_BIT);  // draw the background
+    glClear(GL_COLOR_BUFFER_BIT); // draw the background
 
     draw();
 
-    glFlush();  // flush out the buffer contents"
+    glFlush(); // flush out the buffer contents"
 }
 
-
 //***********************************************************************************
-void draw() 
+void draw()
 {
 	render_pixelmap();
 	render_text();
@@ -248,30 +254,30 @@ void draw()
     switch (weather_condition)
     {
     case WeatherCondition::Clear:
-        {
-            render_sunny();
-            break;
-        }
-        case WeatherCondition::Raining:
-        {
-            render_raining();
-            break;
-        }
-        case WeatherCondition::Thunder:
-        {
-            render_thunder();
-            break;
-        }
-        case WeatherCondition::Cloudy:
-        {
-            render_cloudy();
-            break;
-        }
-        default:
-        {
-            render_sunny();
-            break;
-        }
+    {
+        render_sunny();
+        break;
+    }
+    case WeatherCondition::Raining:
+    {
+        render_raining();
+        break;
+    }
+    case WeatherCondition::Thunder:
+    {
+        render_thunder();
+        break;
+    }
+    case WeatherCondition::Cloudy:
+    {
+        render_cloudy();
+        break;
+    }
+    default:
+    {
+        render_sunny();
+        break;
+    }
     }
 }
 
@@ -394,7 +400,47 @@ void render_text()
 */
 void render_sunny()
 {
-    return;
+    float x, y;    // x, y for current point
+    int r = 75;    // radius
+    int cx = -150; // center x
+    int cy = 150;  // center y
+    glColor3ub(228, 188, 63);
+    glLineWidth(3);
+
+    glBegin(GL_LINE_LOOP);
+    for (float theta = 0; theta <= 360; theta += .5) // iterate from 180 to 360 degrees to draw a half circle
+    {
+        x = r * cos(theta * M_PI / 180) + cx; // convert degrees to radians and follow formula 1 from lab
+        y = r * sin(theta * M_PI / 180) + cy;
+        glVertex2f(x, y); // draw vertex
+    }
+    glEnd();
+    glBegin(GL_LINES);
+    //Line on top of circle
+    glVertex2i(cx, cy + r);
+    glVertex2i(cx, cy + 125);
+    //Line on bottom of circle
+    glVertex2i(cx, cy - r);
+    glVertex2i(cx, cy - 125);
+    //Line on right side of circle
+    glVertex2i(cx + r, cy);
+    glVertex2i(cx + r + 50, cy);
+    //line on left side of circle
+    glVertex2i(cx - r, cy);
+    glVertex2i(cx - r - 50, cy);
+    //line on top right side of circle
+    glVertex2i(cx + 52, cy + 52);
+    glVertex2i(cx + 92, cy + 92);
+    //line on top left side of circle
+    glVertex2i(cx - 52, cy + 52);
+    glVertex2i(cx - 92, cy + 92);
+    //line on bottom right side of circle
+    glVertex2i(cx + 52, cy - 52);
+    glVertex2i(cx + 92, cy - 92);
+    //line on bottom left side of circle
+    glVertex2i(cx - 52, cy - 52);
+    glVertex2i(cx - 92, cy - 92);
+    glEnd();
 }
 
 /**
